@@ -1,0 +1,27 @@
+POST localhost:8080/produce
+Content-Type: application/json
+
+{
+  "id": 9999,
+  "createdAt":"2022-07-30T10:24:35.511",
+  "items":[
+    {
+      "id": 10,
+      "skuCode":"144789",
+      "quantity":1,
+      "brand":"XIAOMI"
+    },
+    {
+      "id": 11,
+      "skuCode":"51234",
+      "quantity":1,
+      "brand":"APPLE"
+    },
+    {
+      "id": 12,
+      "skuCode":"50000",
+      "quantity":1,
+      "brand":"POSITIVO"
+    }
+  ]
+}

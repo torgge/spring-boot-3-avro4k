@@ -1,0 +1,26 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    properties:
+      schema:
+        registry:
+          url: http://localhost:8081
+    producer:
+      client-id: springboot-3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      acks: 1
+      compression-type: lz4
+      properties:
+        retries: 10
+        buffer:
+          memory: 33554432
+        linger:
+          ms: 1
+        auto:
+          register:
+            schemas: true
+app:
+  kafka:
+    producer:
+      topics: order
