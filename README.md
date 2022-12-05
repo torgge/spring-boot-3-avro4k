@@ -105,4 +105,4 @@ data class PurchaseOrderDto(
 }
 ```
 ### AKHQ
-![Screenshot](doc/assets/Screenshot 2022-12-05 at 10.36.13.png)
+![Screenshot](https://raw.githubusercontent.com/torgge/spring-boot-3-avro4k/blob/main/doc/assets/Screenshot%202022-12-05%20at%2010.36.13.png)
