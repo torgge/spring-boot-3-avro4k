@@ -1,10 +1,10 @@
 spring:
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:29092
     properties:
       schema:
         registry:
-          url: http://localhost:8081
+          url: http://localhost:8085
     producer:
       client-id: springboot-3
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -24,3 +24,5 @@ app:
   kafka:
     producer:
       topics: order
+server:
+  port: 8199

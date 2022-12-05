@@ -1,32 +1,55 @@
 version: '3'
 services:
+
   zookeeper:
-    image: confluentinc/cp-zookeeper:3.3.1
-    network_mode: host
+    image: confluentinc/cp-zookeeper:5.5.8.amd64
     environment:
       ZOOKEEPER_CLIENT_PORT: 32181
       ZOOKEEPER_TICK_TIME: 2000
+    network_mode: host
 
   kafka:
-    image: confluentinc/cp-kafka:3.3.1
-    network_mode: host
+    image: confluentinc/cp-kafka:5.5.8.amd64
     ports:
-      - "9092:9092"
+      - "29092:29092"
     depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: localhost:32181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    network_mode: host
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:3.3.1
-    network_mode: host
+    image: confluentinc/cp-schema-registry:5.5.8.amd64
     depends_on:
       - zookeeper
       - kafka
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: localhost:32181
       SCHEMA_REGISTRY_HOST_NAME: localhost
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8085
+    network_mode: host
+
+  akhq:
+    image: tchiotludo/akhq:0.21.0
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "host.docker.internal:29092"
+              schema-registry:
+                url: "http://localhost:8085"
+        micronaut:
+          server:
+            port: 9900
+    ports:
+      - "9900:9900"
+    depends_on:
+      - zookeeper
+      - kafka
+      - schema-registry
+    network_mode: host
