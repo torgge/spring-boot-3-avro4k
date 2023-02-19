@@ -5,5 +5,5 @@ import java.time.LocalDateTime
 data class Order(
     val id: Long?,
     val items: List<Material>,
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime,
 )

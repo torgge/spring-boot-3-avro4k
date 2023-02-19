@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody
 class OrderController(
     @Autowired private val orderService: OrderServiceImpl
 ) {
-
     @PostMapping("/produce")
     fun produceKafkaMessage(@RequestBody purchaseOrder: PurchaseOrderDto): HttpEntity<Any?> {
         val order = purchaseOrder.toVO()

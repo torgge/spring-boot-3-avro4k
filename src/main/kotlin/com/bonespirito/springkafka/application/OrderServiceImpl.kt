@@ -15,7 +15,7 @@ import java.util.*
 @Service
 class OrderServiceImpl(
     @Autowired private val kafkaTemplate: KafkaTemplate<String, GenericRecord>,
-): OrderService {
+) : OrderService {
 
     @Value("\${app.kafka.producer.topics}")
     private val topic: String = "order"
@@ -29,12 +29,12 @@ class OrderServiceImpl(
 
         kafkaTemplate.send(
             topic,
-            avroRecord
+            uuid,
+            avroRecord,
         )
     }
 
     override fun consume() {
         TODO("Not yet implemented")
     }
-
 }
