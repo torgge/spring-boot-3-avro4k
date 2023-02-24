@@ -14,6 +14,7 @@ import {
     TOPIC_NAME_STRATEGY,
     RECORD_NAME_STRATEGY,
     SCHEMA_TYPE_AVRO,
+    SCHEMA_TYPE_STRING
 } from "k6/x/kafka"; // import kafka extension
 
 const brokerIp = __ENV.SERVICE_HOSTNAME
@@ -42,16 +43,11 @@ if (__VU == 0) {
 
 const keySchema = `{
   "name": "KeySchema",
-  "type": "record",
-  "namespace": "com.example.key",
-  "fields": [
-    {
-      "name": "ssn",
-      "type": "string"
-    }
-  ]
+  "type": "string",
+  "namespace": "com.example.key"
 }
 `;
+
 const valueSchema = `{
   "name": "ValueSchema",
   "type": "record",
@@ -85,7 +81,7 @@ const valueSubjectName = schemaRegistry.getSubjectName({
 const keySchemaObject = schemaRegistry.createSchema({
     subject: keySubjectName,
     schema: keySchema,
-    schemaType: SCHEMA_TYPE_AVRO,
+    schemaType: SCHEMA_TYPE_STRING,
 });
 
 const valueSchemaObject = schemaRegistry.createSchema({
@@ -99,11 +95,9 @@ export default function () {
         let messages = [
             {
                 key: schemaRegistry.serialize({
-                    data: {
-                        ssn: "ssn-" + index,
-                    },
+                    data: index,
                     schema: keySchemaObject,
-                    schemaType: SCHEMA_TYPE_AVRO,
+                    schemaType: SCHEMA_TYPE_STRING,
                 }),
                 value: schemaRegistry.serialize({
                     data: {
