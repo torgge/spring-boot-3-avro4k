@@ -1,10 +1,13 @@
 package com.bonespirito.springkafka.application
 
 import com.bonespirito.springkafka.domain.dto.PurchaseOrderDto
+import com.bonespirito.springkafka.domain.dto.PurchaseOrderKey
 import com.bonespirito.springkafka.domain.model.Order
 import com.bonespirito.springkafka.domain.service.OrderService
 import com.bonespirito.springkafka.domain.utils.converter.toDto
 import com.github.avrokotlin.avro4k.Avro
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.apache.avro.generic.GenericRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -29,7 +32,7 @@ class OrderServiceImpl(
 
         kafkaTemplate.send(
             topic,
-            uuid,
+            Json.encodeToString(PurchaseOrderKey(ssn = uuid)),
             avroRecord,
         )
     }

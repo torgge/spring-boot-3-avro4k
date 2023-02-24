@@ -105,4 +105,27 @@ data class PurchaseOrderDto(
 }
 ```
 ### AKHQ
-![Screenshot](../doc/assets/Screenshot%202022-12-05%20at%2010.36.13.png)
+![Screenshot](./doc/assets/Screenshot%202022-12-05%20at%2010.36.13.png)
+
+# K6 Stress tests - Direct produce message in Kafka
+### Docker using [LensesIO](https://github.com/lensesio/fast-data-dev)
+```shell
+sudo docker run \                                                               
+    --detach --rm \
+    --name lensesio \
+    -p 2181:2181 \
+    -p 3030:3030 \
+    -p 8081-8083:8081-8083 \
+    -p 9581-9585:9581-9585 \
+    -p 9092:9092 \
+    -e ADV_HOST=192.168.0.164 \ #Your IP
+    -e RUN_TESTS=0 \
+    dougdonohoe/fast-data-dev:latest
+```
+### LensesIO UI
+http://localhost:3030/
+
+### Command
+````shell
+docker run --rm -i mostafamoradian/xk6-kafka:latest -e SERVICE_HOSTNAME=192.168.0.164 run - <./docker/k6/script.js
+````

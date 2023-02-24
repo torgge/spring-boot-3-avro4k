@@ -1,4 +1,5 @@
 version: '3'
+
 services:
 
   zookeeper:
@@ -53,3 +54,51 @@ services:
       - kafka
       - schema-registry
     network_mode: host
+
+#  influxdb:
+#    image: influxdb:1.8
+#    ports:
+#      - "8086:8086"
+#    environment:
+#      - INFLUXDB_DB=k6
+#    network_mode: host
+#
+#  grafana:
+#    image: grafana/grafana:latest
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+#      - GF_AUTH_ANONYMOUS_ENABLED=true
+#      - GF_AUTH_BASIC_ENABLED=false
+#    volumes:
+#      - ./grafana:/etc/grafana/provisioning/
+#    network_mode: host
+
+  k6-kafka:
+    image: mostafamoradian/xk6-kafka:latest
+    ports:
+      - "2181:2181"
+      - "3030:3030"
+      - "8081-8083:8081-8083"
+      - "9581-9585:9581-9585"
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      - ADV_HOST=localhost
+    network_mode: host
+    depends_on:
+      - zookeeper
+      - kafka
+      - schema-registry
+    volumes:
+      - ./k6:/scripts
+#    image: grafana/k6:latest
+#    networks:
+#      - k6
+#    ports:
+#      - "6565:6565"
+#    environment:
+#      - K6_OUT=influxdb=http://influxdb:8086/k6
+#    volumes:
+#      - ./k6:/scripts
