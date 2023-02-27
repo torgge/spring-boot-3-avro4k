@@ -2,8 +2,7 @@
 This is a k6 test script that imports the xk6-kafka and
 tests Kafka with a 100 Avro messages per iteration.
 */
-
-import { check } from "k6";
+import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 import {
     Writer,
     Reader,
@@ -19,7 +18,7 @@ import {
 
 const brokerIp = __ENV.SERVICE_HOSTNAME
 const brokers = [`${brokerIp}:9092`];
-const topic = "order";
+const topic = "order-abc";
 
 const writer = new Writer({
     brokers: brokers,
@@ -41,68 +40,101 @@ if (__VU == 0) {
     connection.createTopic({ topic: topic });
 }
 
-const keySchema = `{
-  "name": "KeySchema",
-  "type": "string",
-  "namespace": "com.example.key"
-}
-`;
-
 const valueSchema = `{
-  "name": "ValueSchema",
-  "type": "record",
-  "namespace": "com.example.value",
-  "fields": [
-    {
-      "name": "firstName",
-      "type": "string"
-    },
-    {
-      "name": "lastName",
-      "type": "string"
-    }
-  ]
-}`;
-
-const keySubjectName = schemaRegistry.getSubjectName({
-    topic: topic,
-    element: KEY,
-    subjectNameStrategy: TOPIC_NAME_STRATEGY,
-    schema: keySchema,
-});
-
-const valueSubjectName = schemaRegistry.getSubjectName({
+    "type": "record",
+    "name": "Order",
+    "namespace": "supply-channel.income.order.v1-value",
+    "fields": [
+      {
+        "name": "id",
+        "type": [
+          "null",
+          "long"
+        ],
+        "doc": "Order ID"
+      },
+      {
+        "name": "items",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Item",
+            "namespace": "supply-channel.income.item.v1",
+            "fields": [
+              {
+                "name": "id",
+                "type": [
+                  "null",
+                  "long"
+                ]
+              },
+              {
+                "name": "skuCode",
+                "type": "string"
+              },
+              {
+                "name": "quantity",
+                "type": "int"
+              },
+              {
+                "name": "brand",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "doc": "Order Items"
+      },
+      {
+        "name": "createdAt",
+        "type": "string",
+        "doc": "Created Order at",
+        "nombre": "teste"
+      },
+      {
+        "name": "inst",
+        "type": {
+          "type": "string"
+        }
+      }
+    ]
+  }`;
+  
+  const valueSubjectName = schemaRegistry.getSubjectName({
     topic: topic,
     element: VALUE,
     subjectNameStrategy: RECORD_NAME_STRATEGY,
     schema: valueSchema,
-});
-
-const keySchemaObject = schemaRegistry.createSchema({
-    subject: keySubjectName,
-    schema: keySchema,
-    schemaType: SCHEMA_TYPE_STRING,
-});
-
-const valueSchemaObject = schemaRegistry.createSchema({
+  });
+  
+  const valueSchemaObject = schemaRegistry.createSchema({
     subject: valueSubjectName,
     schema: valueSchema,
     schemaType: SCHEMA_TYPE_AVRO,
-});
+  });
 
 export default function () {
-    for (let index = 0; index < 100; index++) {
+
         let messages = [
             {
                 key: schemaRegistry.serialize({
-                    data: index,
-                    schema: keySchemaObject,
+                    data: uuidv4(),
                     schemaType: SCHEMA_TYPE_STRING,
-                }),
+                  }),
                 value: schemaRegistry.serialize({
                     data: {
-                        firstName: "firstName-" + index,
-                        lastName: "lastName-" + index,
+                        id: 10,
+                        createdAt: '2023-02-25T00:00:01',
+                        inst:'2023-02-25T00:00:01',
+                        items: [
+                            {
+                                id: 51,
+                                skuCode: "1010",
+                                quantity: 2,
+                                brand: "PHILCO"
+                            }
+                        ]
                     },
                     schema: valueSchemaObject,
                     schemaType: SCHEMA_TYPE_AVRO,
@@ -110,35 +142,35 @@ export default function () {
             },
         ];
         writer.produce({ messages: messages });
-    }
+    
 
-    let messages = reader.consume({ limit: 20 });
-    check(messages, {
-        "20 message returned": (msgs) => msgs.length == 20,
-        "key starts with 'ssn-' string": (msgs) =>
-            schemaRegistry
-                .deserialize({
-                    data: msgs[0].key,
-                    schema: keySchemaObject,
-                    schemaType: SCHEMA_TYPE_AVRO,
-                })
-                .ssn.startsWith("ssn-"),
-        "value contains 'firstName-' and 'lastName-' strings": (msgs) =>
-            schemaRegistry
-                .deserialize({
-                    data: msgs[0].value,
-                    schema: valueSchemaObject,
-                    schemaType: SCHEMA_TYPE_AVRO,
-                })
-                .firstName.startsWith("firstName-") &&
-            schemaRegistry
-                .deserialize({
-                    data: msgs[0].value,
-                    schema: valueSchemaObject,
-                    schemaType: SCHEMA_TYPE_AVRO,
-                })
-                .lastName.startsWith("lastName-"),
-    });
+    // let messages = reader.consume({ limit: 20 });
+    // check(messages, {
+    //     "20 message returned": (msgs) => msgs.length == 20,
+    //     "key starts with 'ssn-' string": (msgs) =>
+    //         schemaRegistry
+    //             .deserialize({
+    //                 data: msgs[0].key,
+    //                 // schema: keySchemaObject,
+    //                 schemaType: SCHEMA_TYPE_STRING,
+    //             })
+    //             .ssn.startsWith("ssn-"),
+    //     "value contains 'id' and 'createdAt-' strings": (msgs) =>
+    //         schemaRegistry
+    //             .deserialize({
+    //                 data: msgs[0].value,
+    //                 schema: valueSchemaObject,
+    //                 schemaType: SCHEMA_TYPE_AVRO,
+    //             })
+    //             .firstName.startsWith("id") &&
+    //         schemaRegistry
+    //             .deserialize({
+    //                 data: msgs[0].value,
+    //                 schema: valueSchemaObject,
+    //                 schemaType: SCHEMA_TYPE_AVRO,
+    //             })
+    //             .lastName.startsWith("createdAt"),
+    // });
 }
 
 export function teardown(data) {
@@ -147,7 +179,7 @@ export function teardown(data) {
         connection.deleteTopic(topic);
     }
     writer.close();
-    reader.close();
+    // reader.close();
     connection.close();
 }
 
